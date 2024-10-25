@@ -103,7 +103,7 @@ async def start_ticket(bot: hikari.GatewayBot, body):
     await vote_message.add_reaction(yes_emoji)
     await vote_message.add_reaction(no_emoji)
 
-    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(seconds=15)
+    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(hours=24)
 
     task = await database.ticket.create(
         {
@@ -169,10 +169,11 @@ async def handle_ticket(bot: GatewayBot, ticket: Ticket):
 
         try:
             print("Banning...")
-            # await player.ban(
-            #     reason=f"turned down by the league vote Yes: {yes}, No: {no}"
-            # )
+            await player.ban(
+                reason=f"turned down by the league vote Yes: {yes}, No: {no}"
+            )
         except hikari.HikariError:
+            print("Failed to ban")
             pass
 
         await delete_ticket(ticket)
@@ -196,7 +197,7 @@ async def handle_ticket(bot: GatewayBot, ticket: Ticket):
         component=view,
     )
 
-    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(seconds=15)
+    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(hours=24)
 
     await database.ticket.update(
         where={"id": ticket.id},
