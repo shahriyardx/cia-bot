@@ -13,6 +13,8 @@ async def index(_):
 
 async def add_to_server(request: web.Request):
     body = await request.json()
+
+    print(request.headers.keys())
     access_token = request.headers.get("access_token")
     user_id = body.get("user_id")
 
