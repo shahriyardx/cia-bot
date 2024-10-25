@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "sh", "-c", "python3 -O -u main.py" ]
+CMD [ "sh", "-c", "prisma generate && python3 -O -u main.py" ]
