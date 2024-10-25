@@ -1,0 +1,325 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = -1
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  discordId String     @unique
+  name      String
+  email     String     @unique
+  image     String
+  UserInfo  UserInfo[]
+  Logins    Logins[]
+}
+
+enum Gender {
+  male
+  female
+  unknown
+}
+
+enum Position {
+  left_wing
+  right_wing
+  left_defense
+  right_defense
+  center
+  goalie
+}
+
+enum Hand {
+  left
+  right
+}
+
+model Ticket {
+  id         String   @id @default(cuid())
+  user_id    String
+  channel_id String
+  message_id String
+  time       DateTime
+  step       Int      @default(1)
+}
+
+model UserInfo {
+  id        String @id @default(cuid())
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String
+  discordId String
+  blazeId   String
+  inviterId String
+
+  primaryConsole    String
+  psn               String?
+  psn_account_id    String?
+  gamertag          String?
+  xbox_account_id   String?
+  eaId              String?
+  birthday          DateTime
+  gender            Gender
+  jerseyNumber      Int
+  primaryPosition   Position
+  secondaryPosition Position
+  city              String
+  shootingHand      Hand
+  phone             String?
+
+  console_verified Boolean @default(false)
+  user_ip          String?
+  console_ip       String?
+  console_agent    String?
+
+  season      Season        @relation(fields: [seasonId], references: [id])
+  seasonId    String
+  MatchPlayer MatchPlayer[]
+
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id             String  @id @default(cuid())
+  npsso          String
+  xapi           String
+  support_server String  @default("1283055660866600960")
+  currentSeason  Season? @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  seasonId       String?
+  pullGames      Boolean @default(true)
+}
+
+model Roles {
+  id                  String   @id @default(cuid())
+  left_wing           String
+  right_wing          String
+  left_defense        String
+  right_defense       String
+  center              String
+  goalie              String
+  playstation         String
+  xbox                String
+  signup_add_roles    String[]
+  signup_remove_roles String[]
+}
+
+model Logins {
+  id     String   @id @default(cuid())
+  userId String
+  time   DateTime @default(now())
+  ip     String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Url {
+  id          String @id @default(cuid())
+  text        String @unique
+  destination String
+}
+
+model InviteCode {
+  id     String @id @default(cuid())
+  code   String
+  userId String @unique
+}
+
+model Season {
+  id          String        @id @default(cuid())
+  name        String
+  playOff     Boolean       @default(false)
+  Settings    Settings[]
+  MatchPlayer MatchPlayer[]
+  MatchClub   MatchClub[]
+  Match       Match[]
+  UserInfo    UserInfo[]
+
+  createdAt     DateTime            @default(now())
+  SeasonalStats ClubSeasonalStats[]
+}
+
+model Club {
+  id     String @id @default(cuid())
+  clubId String @unique
+
+  name  String
+  image String
+
+  createdAt     DateTime            @default(now())
+  matchesHome   MatchClub[]         @relation("HomeClub")
+  matchesAway   MatchClub[]         @relation("AwayClub")
+  ClubStats     ClubStats[]
+  SeasonalStats ClubSeasonalStats[]
+}
+
+model ClubSeasonalStats {
+  id     String @id @default(cuid())
+  club   Club   @relation(fields: [clubId], references: [id])
+  clubId String
+
+  season   Season @relation(fields: [seasonId], references: [id])
+  seasonId String
+
+  points Int @default(0)
+  otl    Int @default(0)
+  adj    Int @default(0)
+}
+
+model ClubStats {
+  id     String @id @default(cuid())
+  club   Club   @relation(fields: [clubId], references: [id])
+  clubId String
+  points Int
+}
+
+model Match {
+  id      String @id @default(cuid())
+  matchId String
+
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId String
+
+  timestamp String
+  homeGoal  String
+  awayGoal  String
+
+  clubs   MatchClub[]
+  players MatchPlayer[]
+
+  is_lagout Boolean @default(false)
+  is_ot     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model MatchClub {
+  id String @id @default(cuid())
+
+  clubId String
+  club   Club   @relation("HomeClub", fields: [clubId], references: [clubId])
+
+  clubAgainstId String
+  clubAgainst   Club   @relation("AwayClub", fields: [clubAgainstId], references: [clubId], onDelete: Cascade)
+
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId String
+
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId String
+
+  goals               String
+  goalsAgainst        String
+  clubDivision        String
+  cNhlOnlineGameType  String
+  garaw               String
+  gfraw               String
+  losses              String
+  memberString        String
+  opponentClubId      String
+  opponentScore       String
+  opponentTeamArtAbbr String
+  passa               String
+  passc               String
+  ppg                 String
+  ppo                 String
+  result              String
+  score               String
+  scoreString         String
+  shots               String
+  teamArtAbbr         String
+  teamSide            String
+  toa                 String
+  winnerByDnf         String
+  winnerByGoalieDnf   String
+
+  createdAt DateTime      @default(now())
+  players   MatchPlayer[]
+}
+
+model MatchPlayer {
+  id String @id @default(cuid())
+
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId String
+
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId String
+
+  user   UserInfo @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  club   MatchClub @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String
+
+  blazeId            String
+  playerClass        String @map("class")
+  glbrksavepct       String
+  glbrksaves         String
+  glbrkshots         String
+  gldsaves           String
+  glga               String
+  glgaa              String
+  glpensavepct       String
+  glpensaves         String
+  glpenshots         String
+  glpkclearzone      String
+  glpokechecks       String
+  glsavepct          String
+  glsaves            String
+  glshots            String
+  glsoperiods        String
+  isGuest            String
+  opponentClubId     String
+  opponentScore      String
+  opponentTeamId     String
+  player_dnf         String
+  playerLevel        String
+  pNhlOnlineGameType String
+  position           String
+  posSorted          String
+  ratingDefense      String
+  ratingOffense      String
+  ratingTeamplay     String
+  score              String
+  skassists          String
+  skbs               String
+  skdeflections      String
+  skfol              String
+  skfopct            String
+  skfow              String
+  skgiveaways        String
+  skgoals            String
+  skgwg              String
+  skhits             String
+  skinterceptions    String
+  skpassattempts     String
+  skpasses           String
+  skpasspct          String
+  skpenaltiesdrawn   String
+  skpim              String
+  skpkclearzone      String
+  skplusmin          String
+  skpossession       String
+  skppg              String
+  sksaucerpasses     String
+  skshg              String
+  skshotattempts     String
+  skshotonnetpct     String
+  skshotpct          String
+  skshots            String
+  sktakeaways        String
+  teamId             String
+  teamSide           String
+  toi                String
+  toiseconds         String
+  playername         String
+  clientPlatform     String
+
+  createdAt DateTime @default(now())
+}
