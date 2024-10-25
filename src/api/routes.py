@@ -16,12 +16,14 @@ async def add_to_server(request: web.Request):
     access_token = request.headers.get("access_token")
     user_id = body.get("user_id")
 
+    print(access_token, user_id)
     guild = await get_support_server(request.app.bot)
     try:
         await request.app.bot.rest.add_user_to_guild(
             access_token, guild.id, int(user_id)
         )
-    except hikari.HikariError:
+    except hikari.HikariError as e:
+        print(e)
         return web.json_response(
             {"success": False, "error": "unable to add member to the server"}
         )
