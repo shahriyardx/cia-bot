@@ -208,12 +208,10 @@ async def handle_ticket(bot: GatewayBot, ticket: Ticket):
 async def handle_approval_interaction(
     bot: GatewayBot, interaction: hikari.ComponentInteraction
 ):
-    server = await get_support_server(bot)
-    ticket = await database.ticket.find_first(
-        where={"message_id": str(interaction.message.id)}
+    await interaction.create_initial_response(
+        hikari.ResponseType.DEFERRED_MESSAGE_CREATE,
+        flags=hikari.MessageFlag.EPHEMERAL,
     )
-    player = server.get_member(int(ticket.user_id))
-    ticket_channel = interaction.get_channel()
 
     is_approver = find(
         server.get_member(interaction.user.id).get_roles(),
@@ -221,17 +219,18 @@ async def handle_approval_interaction(
     )
 
     if not is_approver:
-        return await interaction.create_initial_response(
-            hikari.ResponseType.MESSAGE_CREATE,
-            flags=hikari.MessageFlag.EPHEMERAL,
+        return await interaction.edit_initial_response(
             content="You are not allowed to click this button",
         )
 
-    approved = interaction.custom_id == "approve_player"
-
-    await interaction.create_initial_response(
-        hikari.ResponseType.DEFERRED_MESSAGE_CREATE, flags=hikari.MessageFlag.EPHEMERAL
+    server = await get_support_server(bot)
+    ticket = await database.ticket.find_first(
+        where={"message_id": str(interaction.message.id)}
     )
+    player = server.get_member(int(ticket.user_id))
+    ticket_channel = interaction.get_channel()
+
+    approved = interaction.custom_id == "approve_player"
 
     view = bot.rest.build_message_action_row()
     view.add_interactive_button(hikari.ButtonStyle.SUCCESS, "appr_yes", label="Yes")
