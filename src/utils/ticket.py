@@ -208,11 +208,13 @@ async def handle_ticket(bot: GatewayBot, ticket: Ticket):
 async def handle_approval_interaction(
     bot: GatewayBot, interaction: hikari.ComponentInteraction
 ):
+
     await interaction.create_initial_response(
         hikari.ResponseType.DEFERRED_MESSAGE_CREATE,
         flags=hikari.MessageFlag.EPHEMERAL,
     )
 
+    server = await get_support_server(bot)
     is_approver = find(
         server.get_member(interaction.user.id).get_roles(),
         lambda role: role.id == 1299126429094514729,
