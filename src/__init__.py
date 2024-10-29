@@ -54,6 +54,7 @@ class CiaBot(hikari.GatewayBot):
     async def on_ready(self, _):
         await database.connect()
         await self.cache_commands()
+        await self.schedule_tickets()
         await start_api(self)
 
         print(f"❤️ Bot is ready")
