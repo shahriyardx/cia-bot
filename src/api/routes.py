@@ -39,27 +39,23 @@ async def create_ticket(request: web.Request):
 
 async def members(request):
     support_server = await get_support_server(request.app.bot)
-    all_member = support_server.get_members().values()
+    all_members = support_server.get_members().values()
+    non_bot_members = filter(lambda member: member.is_bot == False, all_members)
 
     return web.json_response(
         {
             "members": list(
-                filter(
-                    None,
-                    map(
-                        lambda member: (
-                            {
-                                "name": member.display_name,
-                                "username": member.username,
-                                "id": str(member.id),
-                                "avatar_url": member.avatar_url.url,
-                            }
-                            if not member.is_bot
-                            else None
-                        ),
-                        all_member,
+                map(
+                    lambda member: (
+                        {
+                            "name": member.display_name,
+                            "username": member.username,
+                            "id": str(member.id),
+                            "avatar_url": member.avatar_url.url if member.avatar_url else "",
+                        }
                     ),
-                )
+                    non_bot_members,
+                ),
             )
         }
     )

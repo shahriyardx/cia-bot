@@ -22,6 +22,7 @@ def ticket_filter(channel: hikari.PermissibleGuildChannel):
         and channel.type == hikari.ChannelType.GUILD_TEXT
     )
 
+
 commands: List[Command] = [
     Command(
         name="sync-commands",
