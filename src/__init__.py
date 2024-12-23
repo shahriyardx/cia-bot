@@ -57,7 +57,7 @@ class CiaBot(hikari.GatewayBot):
         await self.schedule_tickets()
         await start_api(self)
 
-        print(f"❤️ Bot is ready")
+        print(f"❤️ Bot is ready", self.get_me())
 
     async def handle_interaction(self, event: hikari.InteractionCreateEvent):
         interaction = event.interaction

@@ -6,6 +6,7 @@ import hikari
 from src.types import CiaBot
 from src.utils.database import get_support_server
 
+from .draft import commands
 from .utils import Command, defer
 from .utils.flags import DEFERRED_CREATE, LOADING_EPHEMERAL, NONE
 
@@ -14,13 +15,6 @@ from .utils.flags import DEFERRED_CREATE, LOADING_EPHEMERAL, NONE
 async def sync_commands(bot: CiaBot, interaction: hikari.CommandInteraction):
     await bot.register_commands()
     await interaction.edit_initial_response(content="Sync finished")
-
-
-def ticket_filter(channel: hikari.PermissibleGuildChannel):
-    return (
-        channel.parent_id == 1283055662468694027
-        and channel.type == hikari.ChannelType.GUILD_TEXT
-    )
 
 
 commands: List[Command] = [
@@ -32,4 +26,5 @@ commands: List[Command] = [
         options=[],
         guild_ids=[],
     ),
+    *commands,
 ]

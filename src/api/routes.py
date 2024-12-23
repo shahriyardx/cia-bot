@@ -51,7 +51,9 @@ async def members(request):
                             "name": member.display_name,
                             "username": member.username,
                             "id": str(member.id),
-                            "avatar_url": member.avatar_url.url if member.avatar_url else "",
+                            "avatar_url": (
+                                member.avatar_url.url if member.avatar_url else ""
+                            ),
                         }
                     ),
                     non_bot_members,

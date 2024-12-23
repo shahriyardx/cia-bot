@@ -12,13 +12,15 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  discordId String     @unique
-  name      String
-  email     String     @unique
-  image     String
-  UserInfo  UserInfo[]
-  Logins    Logins[]
+  id                    String                 @id @default(cuid())
+  discordId             String                 @unique
+  name                  String
+  email                 String                 @unique
+  image                 String
+  UserInfo              UserInfo[]
+  Logins                Logins[]
+  SeasonalRegistrations SeasonalRegistration[]
+  SeasonalDraft         SeasonalDraft[]
 }
 
 enum Gender {
@@ -48,6 +50,33 @@ model Ticket {
   message_id String
   time       DateTime
   step       Int      @default(1)
+}
+
+model SeasonalRegistration {
+  id String @id @default(cuid())
+
+  seasonId          String
+  userInfoId        String
+  userId            String
+  primaryPosition   Position @default(left_wing)
+  secondaryPosition Position @default(left_wing)
+
+  season   Season   @relation(fields: [seasonId], references: [id])
+  userInfo UserInfo @relation(fields: [userInfoId], references: [id])
+  User     User     @relation(fields: [userId], references: [id])
+}
+
+model SeasonalDraft {
+  id       String   @id @default(cuid())
+  season   Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+  userInfo UserInfo @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  seasonId   String
+  userInfoId String
+  userId     String
+  clubId     String
 }
 
 model UserInfo {
@@ -82,17 +111,21 @@ model UserInfo {
   seasonId    String
   MatchPlayer MatchPlayer[]
 
-  createdAt DateTime @default(now())
+  createdAt            DateTime               @default(now())
+  SeasonalRegistration SeasonalRegistration[]
+
+  SeasonalDraft SeasonalDraft[]
 }
 
 model Settings {
-  id             String  @id @default(cuid())
-  npsso          String
-  xapi           String
-  support_server String  @default("1283055660866600960")
-  currentSeason  Season? @relation(fields: [seasonId], references: [id], onDelete: SetNull)
-  seasonId       String?
-  pullGames      Boolean @default(true)
+  id               String  @id @default(cuid())
+  npsso            String
+  xapi             String
+  support_server   String  @default("1283055660866600960")
+  currentSeason    Season? @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  seasonId         String?
+  pullGames        Boolean @default(true)
+  registrationOpen Boolean @default(true)
 }
 
 model Roles {
@@ -140,8 +173,11 @@ model Season {
   Match       Match[]
   UserInfo    UserInfo[]
 
-  createdAt     DateTime            @default(now())
-  SeasonalStats ClubSeasonalStats[]
+  createdAt            DateTime               @default(now())
+  SeasonalStats        ClubSeasonalStats[]
+  RawMatch             RawMatch[]
+  SeasonalRegistration SeasonalRegistration[]
+  SeasonalDraft        SeasonalDraft[]
 }
 
 model Club {
@@ -156,6 +192,7 @@ model Club {
   matchesAway   MatchClub[]         @relation("AwayClub")
   ClubStats     ClubStats[]
   SeasonalStats ClubSeasonalStats[]
+  SeasonalDraft SeasonalDraft[]
 }
 
 model ClubSeasonalStats {
@@ -166,6 +203,8 @@ model ClubSeasonalStats {
   season   Season @relation(fields: [seasonId], references: [id])
   seasonId String
 
+  wins   Int @default(0)
+  loses  Int @default(0)
   points Int @default(0)
   otl    Int @default(0)
   adj    Int @default(0)
@@ -196,6 +235,17 @@ model Match {
   is_ot     Boolean @default(false)
 
   createdAt DateTime @default(now())
+}
+
+model RawMatch {
+  id              String  @id @default(cuid())
+  matchId         String
+  rawData         String
+  timestamp       Int
+  incompleteMatch Boolean @default(false)
+  season          Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  seasonId        String
+  isCalculated    Boolean @default(false)
 }
 
 model MatchClub {
