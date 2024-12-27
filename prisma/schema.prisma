@@ -43,6 +43,17 @@ enum Hand {
   right
 }
 
+enum PlayerRole {
+  owner
+  gm
+  player
+}
+
+enum RegType {
+  normal
+  free_agent
+}
+
 model Ticket {
   id         String   @id @default(cuid())
   user_id    String
@@ -60,6 +71,7 @@ model SeasonalRegistration {
   userId            String
   primaryPosition   Position @default(left_wing)
   secondaryPosition Position @default(left_wing)
+  regType           RegType  @default(normal)
 
   season   Season   @relation(fields: [seasonId], references: [id])
   userInfo UserInfo @relation(fields: [userInfoId], references: [id])
@@ -67,11 +79,13 @@ model SeasonalRegistration {
 }
 
 model SeasonalDraft {
-  id       String   @id @default(cuid())
-  season   Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id])
-  userInfo UserInfo @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
-  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  id       String     @id @default(cuid())
+  season   Season     @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id])
+  userInfo UserInfo   @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
+  club     Club       @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  role     PlayerRole @default(player)
+  round    Int        @default(1)
 
   seasonId   String
   userInfoId String

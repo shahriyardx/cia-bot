@@ -1,8 +1,8 @@
 from typing import Dict
 
 import hikari
-
-from src.commands import commands
+import miru
+from src.commands import draft_commands, admin_commands, user_commands
 from src.commands.utils import Command
 from src.utils import database, env
 from src.utils.scheduler import Scheduler
@@ -17,6 +17,7 @@ class CiaBot(hikari.GatewayBot):
 
         self.scheduler = Scheduler(self)
         self.global_commands: Dict[str, Command] = {}
+        self.miru = miru.Client(self)
         self.subscribe(hikari.StartedEvent, self.on_ready)
         self.subscribe(hikari.InteractionCreateEvent, self.handle_interaction)
 
@@ -34,13 +35,24 @@ class CiaBot(hikari.GatewayBot):
         return cmd
 
     async def cache_commands(self):
-        for command in commands:
+        for command in [*admin_commands, *user_commands, *draft_commands]:
             self.global_commands[command.name] = command
 
     async def register_commands(self):
         app = await self.rest.fetch_application()
-        cmds = map(self.build_command, commands)
+        cmds = map(self.build_command, user_commands)
         await self.rest.set_application_commands(app, list(cmds))
+
+        # only support server commands
+        settings = await database.settings.find_first()
+        if not settings:
+            return
+
+        support_server_id = int(settings.support_server)
+        cmds = map(self.build_command, [*admin_commands, *draft_commands])
+        await self.rest.set_application_commands(
+            app, list(cmds), guild=support_server_id
+        )
 
     async def schedule_tickets(self):
         tickets = await database.ticket.find_many()

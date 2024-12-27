@@ -6,7 +6,6 @@ import hikari
 from src.types import CiaBot
 from src.utils.database import get_support_server
 
-from .draft import commands
 from .utils import Command, defer
 from .utils.flags import DEFERRED_CREATE, LOADING_EPHEMERAL, NONE
 
@@ -26,5 +25,4 @@ commands: List[Command] = [
         options=[],
         guild_ids=[],
     ),
-    *commands,
 ]
