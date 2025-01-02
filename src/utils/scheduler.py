@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Awaitable
 
 import hikari
-from prisma.models import Ticket
+from prisma.models import VotingTickets
 
 from .ticket import handle_ticket
 
@@ -22,8 +22,8 @@ class Scheduler:
     def __init__(self, bot: hikari.GatewayBot):
         self.bot = bot
 
-    async def start_ticket_task(self, ticket: Ticket) -> None:
-        seconds = get_delta(ticket.time)
+    async def start_ticket_task(self, ticket: VotingTickets) -> None:
+        seconds = get_delta(ticket.expires)
 
         if seconds > 0:
             await asyncio.sleep(seconds)
@@ -43,7 +43,7 @@ class Scheduler:
 
         await coro
 
-    async def schedule_ticket(self, ticket: Ticket) -> asyncio.Task:
+    async def schedule_ticket(self, ticket: VotingTickets) -> asyncio.Task:
         return asyncio.get_event_loop().create_task(self.start_ticket_task(ticket))
 
     async def schedule_coro(self, time: datetime, coro: Awaitable) -> asyncio.Task:

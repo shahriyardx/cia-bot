@@ -4,15 +4,11 @@ from typing import Sequence
 
 import hikari
 from hikari import GatewayBot
-from prisma.models import Ticket
+from prisma.models import VotingTickets
 
 from src.utils.database import database, get_support_server
-
+from src.utils.env import env
 from .misc import find
-
-
-async def delete_ticket(ticket: Ticket):
-    await database.ticket.delete(where={"id": ticket.id})
 
 
 async def get_ticket(server: hikari.GatewayGuild, user_id: int):
@@ -33,26 +29,39 @@ async def get_ticket(server: hikari.GatewayGuild, user_id: int):
 
 
 async def start_ticket(bot: hikari.GatewayBot, body):
-    user_id = body.get("user_id")
-    if not user_id:
-        return
-
-    user_info = await database.userinfo.find_first(where={"id": user_id})
-    if not user_info:
-        return
-
     server = await get_support_server(bot)
+
+    ticket_id = body.get("ticket_id")
+    if not ticket_id:
+        return
+
+    ticket = await database.votingtickets.find_first(where={"id": ticket_id})
+    if not ticket:
+        return
+
+    user = await database.user.find_first(where={"id": ticket.userId})
+    user_info = await database.userinfo.find_first(where={"userId": user.id})
+
     bot_util_channel: hikari.TextableGuildChannel = server.get_channel(
         1283055665514024968
     )
 
-    ticket = await get_ticket(server, user_info.discordId)
+    await bot_util_channel.send(f"$new {user.discordId}")
 
-    if not ticket:
+    player = server.get_member(int(user.discordId))
+    inviter = server.get_member(int(user_info.inviterId))
+
+    bot_util_channel: hikari.TextableGuildChannel = server.get_channel(
+        1283055665514024968
+    )
+
+    ticket_channel = await get_ticket(server, user_info.discordId)
+
+    if not ticket_channel:
         await bot_util_channel.send(f"$new {user_info.discordId}")
         await asyncio.sleep(5)
 
-    ticket = await get_ticket(server, user_info.discordId)
+    ticket_channel = await get_ticket(server, user_info.discordId)
 
     player = server.get_member(int(user_info.discordId))
     inviter = server.get_member(int(user_info.inviterId))
@@ -61,8 +70,8 @@ async def start_ticket(bot: hikari.GatewayBot, body):
     view.add_interactive_button(hikari.ButtonStyle.SUCCESS, "yes", label="Yes")
     view.add_interactive_button(hikari.ButtonStyle.DANGER, "no", label="No")
 
-    await ticket.send(content=f"$add ${inviter.id}")
-    await ticket.send(
+    await ticket_channel.send(content=f"$add ${inviter.id}")
+    await ticket_channel.send(
         content=f"{inviter.mention} did you invite {player.mention}",
         component=view,
     )
@@ -87,72 +96,34 @@ async def start_ticket(bot: hikari.GatewayBot, body):
     )
 
     if interaction.custom_id == "no":
-        await ticket.send("$close")
+        await ticket_channel.send("$close")
         return
 
     cia_role = server.get_role(1283055661403476057)  # CIA role id
-    await ticket.send(f"$add {cia_role.mention}")
-
-    vote_message = await ticket.send(
-        f"{cia_role.mention} Please vote on allowing {player.mention} access to the league."
+    await ticket_channel.send(f"$add {cia_role.mention}")
+    await ticket_channel.send(
+        f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
+        f"\nClick this link to vote <{env.LIVE_SITE}/vote/{ticket_id}>"  # TODO: Add ticket id here
+        # if possible show remaining time
     )
 
-    yes_emoji = find(server.get_emojis().values(), lambda emoji: emoji.name == "yes")
-    no_emoji = find(server.get_emojis().values(), lambda emoji: emoji.name == "no")
-
-    await vote_message.add_reaction(yes_emoji)
-    await vote_message.add_reaction(no_emoji)
-
-    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(hours=24)
-
-    task = await database.ticket.create(
-        {
-            "time": task_time,
-            "channel_id": str(ticket.id),
-            "message_id": str(vote_message.id),
-            "user_id": str(player.id),
-            "step": 1,
-        }
-    )
-
-    await bot.scheduler.schedule_ticket(task)
+    await bot.scheduler.schedule_ticket(ticket)
 
 
-async def get_ticket_info(bot: GatewayBot, ticket: Ticket):
+async def handle_ticket(bot: GatewayBot, ticket: VotingTickets):
+    user = await database.user.find_first(where={"id": ticket.userId})
+    votes = await database.vote.find_many(where={"votingTicketsId": ticket.id})
+
     server = await get_support_server(bot)
-    player = server.get_member(int(ticket.user_id))
-
-    ticket_channel: hikari.GuildTextChannel = server.get_channel(int(ticket.channel_id))
-
-    if not ticket_channel:
-        await delete_ticket(ticket)
-        raise ValueError("")
-
-    try:
-        message = await bot.rest.fetch_message(
-            ticket_channel.id, int(ticket.message_id)
-        )
-    except hikari.HikariError:
-        await delete_ticket(ticket)
-        raise ValueError("")
-
-    reactions = message.reactions
+    player = server.get_member(int(user.discordId))
 
     yes = 0
     no = 0
-
-    for react in reactions:
-        if react.emoji.name == "yes":
-            yes = react.count
-
-        if react.emoji.name == "no":
-            no = react.count
-
-    return [yes, no, server, player, ticket_channel]
-
-
-async def handle_ticket(bot: GatewayBot, ticket: Ticket):
-    yes, no, server, player, ticket_channel = await get_ticket_info(bot, ticket)
+    for vote in votes:
+        if vote.action == "up":
+            yes += 1
+        else:
+            no += 1
 
     if no > yes:
         try:
@@ -176,7 +147,7 @@ async def handle_ticket(bot: GatewayBot, ticket: Ticket):
             print("Failed to ban")
             pass
 
-        await delete_ticket(ticket)
+        ticket_channel = await get_ticket(server, user.discordId)
         await ticket_channel.send(content=f"$close")
         return
 
@@ -279,7 +250,6 @@ async def handle_approval_interaction(
         await player.remove_role(waiting_room_role)
         await player.add_role(cia_role)
 
-        await delete_ticket(ticket)
         await ticket_channel.send(content=f"$close")
 
     elif not approved and confirmed:
@@ -307,6 +277,5 @@ async def handle_approval_interaction(
         except hikari.HikariError:
             pass
 
-        await delete_ticket(ticket)
         await ticket_channel.send("$close")
         return

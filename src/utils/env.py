@@ -12,6 +12,7 @@ class Env:
     TOKEN: str = os.environ["TOKEN"]
     API_HOST: str = os.environ["API_HOST"]
     API_PORT: str = os.environ["API_PORT"]
+    LIVE_SITE: str = os.environ["LIVE_SITE"]
 
 
 env = Env()

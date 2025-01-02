@@ -21,6 +21,8 @@ model User {
   Logins                Logins[]
   SeasonalRegistrations SeasonalRegistration[]
   SeasonalDraft         SeasonalDraft[]
+  VotingTicket          VotingTickets?
+  Vote                  Vote[]
 }
 
 enum Gender {
@@ -129,6 +131,7 @@ model UserInfo {
   SeasonalRegistration SeasonalRegistration[]
 
   SeasonalDraft SeasonalDraft[]
+  VotingTicket  VotingTickets?
 }
 
 model Settings {
@@ -386,4 +389,27 @@ model MatchPlayer {
   clientPlatform     String
 
   createdAt DateTime @default(now())
+}
+
+model VotingTickets {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userInfo  UserInfo @relation(fields: [userInfoId], references: [id])
+  upvotes   Int      @default(0)
+  downvotes Int      @default(0)
+  expires   DateTime
+
+  userId     String @unique
+  userInfoId String @unique
+  Vote       Vote[]
+}
+
+model Vote {
+  id     String        @id @default(cuid())
+  ticket VotingTickets @relation(fields: [votingTicketsId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
+  action String
+
+  userId          String
+  votingTicketsId String @unique
 }
