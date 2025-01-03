@@ -116,14 +116,20 @@ async def handle_ticket(bot: GatewayBot, ticket: VotingTickets):
 
     server = await get_support_server(bot)
     player = server.get_member(int(user.discordId))
+    ticket_channel = await get_ticket(server, user.discordId)
+
+    print(user, server, player, ticket_channel)
 
     yes = 0
     no = 0
+
     for vote in votes:
         if vote.action == "up":
             yes += 1
         else:
             no += 1
+
+    print("Votes", yes, no)
 
     if no > yes:
         try:
@@ -140,19 +146,22 @@ async def handle_ticket(bot: GatewayBot, ticket: VotingTickets):
 
         try:
             print("Banning...")
-            await player.ban(
-                reason=f"turned down by the league vote Yes: {yes}, No: {no}"
-            )
+            # await player.ban(
+            #     reason=f"turned down by the league vote Yes: {yes}, No: {no}"
+            # )
         except hikari.HikariError:
             print("Failed to ban")
             pass
 
-        ticket_channel = await get_ticket(server, user.discordId)
         await ticket_channel.send(content=f"$close")
+        await database.votingtickets.update(
+            where={"id": ticket.id}, data={"expired": True}
+        )
         return
 
+    await database.votingtickets.update(where={"id": ticket.id}, data={"expired": True})
     cia_role = server.get_role(1283055661403476057)
-    commissioner_role = server.get_role(1283055661889880225)
+    commissioner_role = server.get_role(1299126429094514729)
 
     await ticket_channel.send(content=f"$remove {cia_role.mention}")
     await ticket_channel.send(content=f"$add {commissioner_role.mention}")
@@ -163,17 +172,12 @@ async def handle_ticket(bot: GatewayBot, ticket: VotingTickets):
     )
     view.add_interactive_button(hikari.ButtonStyle.DANGER, "deny_player", label="Deny")
 
-    approve_message = await ticket_channel.send(
+    await ticket_channel.send(
         content=f"{commissioner_role.mention} Do you approve the league vote of allowing {player.mention} into the league?",
         component=view,
     )
 
-    task_time = datetime.datetime.now(tz=None) + datetime.timedelta(hours=24)
-
-    await database.ticket.update(
-        where={"id": ticket.id},
-        data={"message_id": str(approve_message.id), "step": 2, "time": task_time},
-    )
+    await database.votingtickets.update(where={"id": ticket.id}, data={"expired": True})
 
 
 async def handle_approval_interaction(

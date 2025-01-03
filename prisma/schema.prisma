@@ -393,11 +393,12 @@ model MatchPlayer {
 
 model VotingTickets {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userInfo  UserInfo @relation(fields: [userInfoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userInfo  UserInfo @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
   upvotes   Int      @default(0)
   downvotes Int      @default(0)
   expires   DateTime
+  expired   Boolean  @default(false)
 
   userId     String @unique
   userInfoId String @unique
@@ -406,8 +407,8 @@ model VotingTickets {
 
 model Vote {
   id     String        @id @default(cuid())
-  ticket VotingTickets @relation(fields: [votingTicketsId], references: [id])
-  user   User          @relation(fields: [userId], references: [id])
+  ticket VotingTickets @relation(fields: [votingTicketsId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   action String
 
   userId          String

@@ -2,6 +2,7 @@ from typing import Dict
 
 import hikari
 import miru
+from datetime import datetime
 from src.commands import draft_commands, admin_commands, user_commands
 from src.commands.utils import Command
 from src.utils import database, env
@@ -55,12 +56,9 @@ class CiaBot(hikari.GatewayBot):
         )
 
     async def schedule_tickets(self):
-        tickets = await database.ticket.find_many()
+        tickets = await database.votingtickets.find_many(where={"expired": False})
 
         for ticket in tickets:
-            if ticket.step != 1:
-                continue
-
             await self.scheduler.schedule_ticket(ticket)
 
     async def on_ready(self, _):

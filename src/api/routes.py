@@ -17,6 +17,8 @@ async def add_to_server(request: web.Request):
     access_token = body.get("access_token")
     user_id = body.get("user_id")
 
+    print(f"{access_token} {user_id}")
+
     guild = await get_support_server(request.app.bot)
     try:
         await request.app.bot.rest.add_user_to_guild(

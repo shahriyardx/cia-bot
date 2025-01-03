@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Awaitable
 
 import hikari
@@ -10,7 +10,7 @@ from .ticket import handle_ticket
 
 def get_delta(execution_time: datetime) -> float:
     now = datetime.now().replace(tzinfo=None)
-    execution_time = execution_time.replace(tzinfo=None)
+    execution_time = now + timedelta(minutes=1)  # execution_time.replace(tzinfo=None)
 
     if execution_time <= now:
         return 0
