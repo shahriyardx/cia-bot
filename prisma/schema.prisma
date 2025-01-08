@@ -391,14 +391,21 @@ model MatchPlayer {
   createdAt DateTime @default(now())
 }
 
+enum VotingApproval {
+  unknown
+  yes
+  no
+}
+
 model VotingTickets {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userInfo  UserInfo @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
-  upvotes   Int      @default(0)
-  downvotes Int      @default(0)
-  expires   DateTime
-  expired   Boolean  @default(false)
+  id                  String         @id @default(cuid())
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userInfo            UserInfo       @relation(fields: [userInfoId], references: [id], onDelete: Cascade)
+  upvotes             Int            @default(0)
+  downvotes           Int            @default(0)
+  expires             DateTime
+  expired             Boolean        @default(false)
+  approved_by_inviter VotingApproval @default(unknown)
 
   userId     String @unique
   userInfoId String @unique

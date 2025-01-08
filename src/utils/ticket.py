@@ -42,70 +42,26 @@ async def start_ticket(bot: hikari.GatewayBot, body):
     user = await database.user.find_first(where={"id": ticket.userId})
     user_info = await database.userinfo.find_first(where={"userId": user.id})
 
-    bot_util_channel: hikari.TextableGuildChannel = server.get_channel(
-        1283055665514024968
-    )
-
-    await bot_util_channel.send(f"$new {user.discordId}")
-
-    player = server.get_member(int(user.discordId))
-    inviter = server.get_member(int(user_info.inviterId))
-
-    bot_util_channel: hikari.TextableGuildChannel = server.get_channel(
-        1283055665514024968
-    )
-
-    ticket_channel = await get_ticket(server, user_info.discordId)
-
-    if not ticket_channel:
-        await bot_util_channel.send(f"$new {user_info.discordId}")
-        await asyncio.sleep(5)
-
-    ticket_channel = await get_ticket(server, user_info.discordId)
-
     player = server.get_member(int(user_info.discordId))
     inviter = server.get_member(int(user_info.inviterId))
 
-    view = bot.rest.build_message_action_row()
-    view.add_interactive_button(hikari.ButtonStyle.SUCCESS, "yes", label="Yes")
-    view.add_interactive_button(hikari.ButtonStyle.DANGER, "no", label="No")
-
-    await ticket_channel.send(content=f"$add ${inviter.id}")
-    await ticket_channel.send(
-        content=f"{inviter.mention} did you invite {player.mention}",
-        component=view,
-    )
-
-    def check(event: hikari.InteractionCreateEvent):
-        if not isinstance(event.interaction, hikari.ComponentInteraction):
-            return False
-
-        interaction = event.interaction
-        if interaction.user.id != inviter.id:
-            return False
-
-        return True
-
-    event: hikari.InteractionCreateEvent = await bot.wait_for(
-        hikari.InteractionCreateEvent, predicate=check, timeout=None
-    )
-    interaction: hikari.ComponentInteraction = event.interaction
-
-    await interaction.create_initial_response(
-        component=None, response_type=hikari.ResponseType.MESSAGE_UPDATE
-    )
-
-    if interaction.custom_id == "no":
-        await ticket_channel.send("$close")
-        return
-
     cia_role = server.get_role(1283055661403476057)  # CIA role id
-    await ticket_channel.send(f"$add {cia_role.mention}")
-    await ticket_channel.send(
-        f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
-        f"\nClick this link to vote <{env.LIVE_SITE}/vote/{ticket_id}>"  # TODO: Add ticket id here
-        # if possible show remaining time
+    vote_channel = server.get_channel(1326635348100382852)
+
+    await inviter.send(
+        content=(
+            f"{player.mention} stated that you have invited them to the league. "
+            "Please click the link below to confirm or reject."
+            "You must click the link within 24 hours from now. \n"
+            f"<{env.LIVE_SITE}/ticket/{ticket_id}/inviter>"
+        )
     )
+
+    # await vote_channel.send(
+    #     f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
+    #     f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
+    #     f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>"
+    # )
 
     await bot.scheduler.schedule_ticket(ticket)
 

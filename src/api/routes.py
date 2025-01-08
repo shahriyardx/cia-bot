@@ -35,6 +35,7 @@ async def add_to_server(request: web.Request):
 
 async def create_ticket(request: web.Request):
     body = await request.json()
+    print(body)
     asyncio.get_event_loop().create_task(start_ticket(request.app.bot, body))
     return web.json_response({"success": True})
 
