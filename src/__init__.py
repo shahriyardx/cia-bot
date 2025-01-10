@@ -7,7 +7,6 @@ from src.commands import draft_commands, admin_commands, user_commands
 from src.commands.utils import Command
 from src.utils import database, env
 from src.utils.scheduler import Scheduler
-from src.utils.ticket import handle_approval_interaction
 
 from .api import start_api
 
@@ -75,10 +74,6 @@ class CiaBot(hikari.GatewayBot):
             command = self.global_commands.get(interaction.command_name)
             if command:
                 await command.callback(self, interaction)
-
-        if isinstance(interaction, hikari.ComponentInteraction):
-            if interaction.custom_id in ["approve_player", "deny_player"]:
-                await handle_approval_interaction(self, interaction)
 
 
 bot = CiaBot(token=env.TOKEN)
