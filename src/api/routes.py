@@ -7,11 +7,12 @@ from src.utils import get_support_server
 from src.utils.ticket import start_ticket
 
 
-async def index(_):
+async def index(bot, _):
+    print(bot)
     return web.json_response({"hello": "world"})
 
 
-async def add_to_server(request: web.Request):
+async def add_to_server(bot: hikari.GatewayBot, request: web.Request):
     body = await request.json()
 
     access_token = body.get("access_token")
@@ -19,7 +20,7 @@ async def add_to_server(request: web.Request):
 
     print(f"{access_token} {user_id}")
 
-    guild = await get_support_server(request.app.bot)
+    guild = await get_support_server(bot)
     try:
         await request.app.bot.rest.add_user_to_guild(
             access_token, guild.id, int(user_id)
@@ -33,15 +34,15 @@ async def add_to_server(request: web.Request):
     return web.json_response({"success": True})
 
 
-async def create_ticket(request: web.Request):
+async def create_ticket(bot: hikari.GatewayBot, request: web.Request):
     body = await request.json()
     print(body)
-    asyncio.get_event_loop().create_task(start_ticket(request.app.bot, body))
+    asyncio.get_event_loop().create_task(start_ticket(bot, body))
     return web.json_response({"success": True})
 
 
-async def members(request):
-    support_server = await get_support_server(request.app.bot)
+async def members(bot: hikari.GatewayBot, request):
+    support_server = await get_support_server(bot)
     all_members = support_server.get_members().values()
     non_bot_members = filter(lambda member: member.is_bot == False, all_members)
 
@@ -64,3 +65,17 @@ async def members(request):
             )
         }
     )
+
+
+async def is_approver(bot: hikari.GatewayBot, req: web.Request):
+    user_id = int(req.match_info.get("user_id"))
+    support_server = await get_support_server(bot)
+    member = support_server.get_member(user_id)
+    
+    if not member:
+        return web.json_response({"status": False})
+
+    if 1299126429094514729 in member.role_ids:
+        return web.json_response({"status": True})
+
+    return web.json_response({"status": False})
