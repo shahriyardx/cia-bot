@@ -99,7 +99,7 @@ async def approver_action(bot: GatewayBot, ticket_id: str):
 
     try:
         print("Banning user")
-        # await player.ban(reason="Did not pass leage vote to join league.")
+        await player.ban(reason="Did not pass leage vote to join league.")
     except Exception as e:
         print("Failed to ban user")
         print(e)
