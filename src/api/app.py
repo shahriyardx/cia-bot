@@ -5,7 +5,14 @@ from hikari import GatewayBot
 from src.utils import env
 
 from .middlewares import trailing_slash_middleware
-from .routes import add_to_server, create_ticket, index, members, is_approver
+from .routes import (
+    add_to_server,
+    create_ticket,
+    index,
+    members,
+    is_approver,
+    finalize_ticket,
+)
 
 
 class Application(web.Application):
@@ -26,8 +33,9 @@ async def start_api(bot: GatewayBot):
     app.router.add_get("/", bot_route(index))
     app.router.add_get("/members/", bot_route(members))
     app.router.add_put("/add-to-server/", bot_route(add_to_server))
-    app.router.add_post("/create-ticket/", bot_route(create_ticket))
     app.router.add_get("/permissions/{user_id}/", bot_route(is_approver))
+    app.router.add_post("/ticket/{ticket_id}/create/", bot_route(create_ticket))
+    app.router.add_post("/ticket/{ticket_id}/finalize/", bot_route(finalize_ticket))
 
     cors = aiohttp_cors.setup(
         app,

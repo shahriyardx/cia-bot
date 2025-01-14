@@ -4,7 +4,7 @@ import hikari
 from aiohttp import web
 
 from src.utils import get_support_server
-from src.utils.ticket import start_ticket
+from src.utils.ticket import start_ticket, approver_action
 
 
 async def index(bot, _):
@@ -35,9 +35,7 @@ async def add_to_server(bot: hikari.GatewayBot, request: web.Request):
 
 
 async def create_ticket(bot: hikari.GatewayBot, request: web.Request):
-    body = await request.json()
-    print(body)
-    asyncio.get_event_loop().create_task(start_ticket(bot, body))
+    asyncio.get_event_loop().create_task(start_ticket(bot, request))
     return web.json_response({"success": True})
 
 
@@ -71,7 +69,7 @@ async def is_approver(bot: hikari.GatewayBot, req: web.Request):
     user_id = int(req.match_info.get("user_id"))
     support_server = await get_support_server(bot)
     member = support_server.get_member(user_id)
-    
+
     status = {
         "approver": False,
         "commissioner": False,
@@ -84,5 +82,13 @@ async def is_approver(bot: hikari.GatewayBot, req: web.Request):
 
     if 1283055661889880225 in member.role_ids:
         status["commissioner"] = True
-    
+
     return web.json_response(status)
+
+
+async def finalize_ticket(bot: hikari.GatewayBot, req: web.Request):
+    ticket_id = req.match_info.get("ticket_id")
+    print("finalizing", ticket_id)
+    await approver_action(bot, ticket_id)
+
+    return web.json_response({"success": True})

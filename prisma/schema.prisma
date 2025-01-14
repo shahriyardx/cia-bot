@@ -406,6 +406,9 @@ model VotingTickets {
   expires             DateTime
   expired             Boolean        @default(false)
   approved_by_inviter VotingApproval @default(unknown)
+  approved            VotingApproval @default(unknown)
+  approved_by         String?
+  rejection_reason    String?
 
   userId     String @unique
   userInfoId String @unique
@@ -413,10 +416,11 @@ model VotingTickets {
 }
 
 model Vote {
-  id     String        @id @default(cuid())
-  ticket VotingTickets @relation(fields: [votingTicketsId], references: [id], onDelete: Cascade)
-  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action String
+  id              String        @id @default(cuid())
+  ticket          VotingTickets @relation(fields: [votingTicketsId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action          String
+  downvote_reason String?
 
   userId          String
   votingTicketsId String @unique
