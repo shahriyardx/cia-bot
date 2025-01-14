@@ -49,7 +49,7 @@ async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
     inviter = server.get_member(int(user_info.inviterId))
 
     cia_role = server.get_role(1283055661403476057)  # CIA role id
-    vote_channel = server.get_channel(1326635348100382852)
+    vote_channel: hikari.TextableGuildChannel = server.get_channel(1326635348100382852)
 
     await inviter.send(
         content=(
@@ -63,7 +63,9 @@ async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
     await vote_channel.send(
         f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
         f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
-        f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>"
+        f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>",
+        user_mentions=True,
+        role_mentions=True,
     )
 
     await bot.scheduler.schedule_ticket(ticket)
