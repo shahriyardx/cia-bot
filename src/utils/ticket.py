@@ -80,13 +80,15 @@ async def approver_action(bot: GatewayBot, ticket_id: str):
     if not ticket:
         return
 
-    if ticket.approved != VotingApproval.no:
-        return
-
     server = await get_support_server(bot)
     user = await database.user.find_first(where={"id": ticket.userId})
     user_info = await database.userinfo.find_first(where={"userId": user.id})
     player = server.get_member(int(user_info.discordId))
+
+    if ticket.approved == VotingApproval.yes:
+        await player.add_role(1283055661403476057)
+        await player.remove_role(1283055661403476056)
+        return
 
     await player.send(
         content=(
