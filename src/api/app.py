@@ -27,7 +27,7 @@ async def start_api(bot: GatewayBot):
     app.router.add_get("/members/", bot_route(members))
     app.router.add_put("/add-to-server/", bot_route(add_to_server))
     app.router.add_post("/create-ticket/", bot_route(create_ticket))
-    app.router.add_get("/approver/{user_id}/", bot_route(is_approver))
+    app.router.add_get("/permissions/{user_id}/", bot_route(is_approver))
 
     cors = aiohttp_cors.setup(
         app,

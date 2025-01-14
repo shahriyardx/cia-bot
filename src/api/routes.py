@@ -72,10 +72,17 @@ async def is_approver(bot: hikari.GatewayBot, req: web.Request):
     support_server = await get_support_server(bot)
     member = support_server.get_member(user_id)
     
+    status = {
+        "approver": False,
+        "commissioner": False,
+    }
     if not member:
-        return web.json_response({"status": False})
+        return web.json_response(status)
 
     if 1299126429094514729 in member.role_ids:
-        return web.json_response({"status": True})
+        status["approver"] = True
 
-    return web.json_response({"status": False})
+    if 1283055661889880225 in member.role_ids:
+        status["commissioner"] = True
+    
+    return web.json_response(status)
