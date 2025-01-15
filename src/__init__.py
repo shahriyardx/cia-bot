@@ -2,7 +2,6 @@ from typing import Dict
 
 import hikari
 import miru
-from datetime import datetime
 from src.commands import draft_commands, admin_commands, user_commands
 from src.commands.utils import Command
 from src.utils import database, env

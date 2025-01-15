@@ -30,6 +30,7 @@ async def get_ticket(server: hikari.GatewayGuild, user_id: int):
         lambda ticket: str(user_id) in ticket.name and "closed" not in ticket.name,
     )
 
+
 async def handle_ticket_init(bot: hikari.GatewayBot, request: web.Request):
     server = await get_support_server(bot)
     ticket_id = request.match_info.get("ticket_id")
@@ -50,15 +51,11 @@ async def handle_ticket_init(bot: hikari.GatewayBot, request: web.Request):
         )
     )
 
+
 async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
     server = await get_support_server(bot)
     ticket_id = request.match_info.get("ticket_id")
-    future = datetime.datetime.now() + datetime.timedelta(hours=24)
-
     ticket = await database.votingtickets.find_first(where={"id": ticket_id})
-    ticket = await database.votingtickets.update(
-        where={"id": ticket_id}, data={"expres": future}
-    )
 
     user = await database.user.find_first(where={"id": ticket.userId})
     player = server.get_member(int(user.discordId))
@@ -66,15 +63,39 @@ async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
     cia_role = server.get_role(1283055661403476057)  # CIA role id
     vote_channel: hikari.TextableGuildChannel = server.get_channel(1326635348100382852)
 
-    await vote_channel.send(
-        f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
-        f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
-        f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>",
-        user_mentions=True,
-        role_mentions=True,
-    )
+    if ticket.approved_by_inviter == "no":
+        await player.send(
+            content=(
+                f"Hello {player.mention}, you did not pass the league vote to grant you access into the league. "
+                "You have been banned from the league at this time and can appeal the vote in the following discord \n\n"
+                "https://discord.gg/TEScsJAsH5 \n\n"
+                "- CIA Commissioners"
+            )
+        )
 
-    await bot.scheduler.schedule_ticket(ticket)
+        try:
+            print("Banning user")
+            await player.ban(reason="Did not pass leage vote to join league.")
+        except Exception as e:
+            print("Failed to ban user")
+            print(e)
+
+        return
+    else:
+        future = datetime.datetime.now() + datetime.timedelta(hours=24)
+        ticket = await database.votingtickets.update(
+            where={"id": ticket_id}, data={"expres": future}
+        )
+
+        await vote_channel.send(
+            f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
+            f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
+            f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>",
+            user_mentions=True,
+            role_mentions=True,
+        )
+
+        await bot.scheduler.schedule_ticket(ticket)
 
 
 async def handle_ticket_end(bot: GatewayBot, ticket: VotingTickets):
