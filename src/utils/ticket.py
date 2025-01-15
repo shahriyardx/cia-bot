@@ -91,8 +91,8 @@ async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
             f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
             f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
             f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>",
-            # user_mentions=True,
-            # role_mentions=True,
+            user_mentions=True,
+            role_mentions=True,
         )
 
         await bot.scheduler.schedule_ticket(ticket)
