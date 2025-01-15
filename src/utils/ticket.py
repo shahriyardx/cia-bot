@@ -60,7 +60,7 @@ async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
     user = await database.user.find_first(where={"id": ticket.userId})
     player = server.get_member(int(user.discordId))
 
-    cia_role = server.get_role(1283055661403476057)  # CIA role id
+    voters_role = server.get_role(1329124446065266718)  # CIA role id
     vote_channel: hikari.TextableGuildChannel = server.get_channel(1326635348100382852)
 
     if ticket.approved_by_inviter == "no":
@@ -88,7 +88,7 @@ async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
         )
 
         await vote_channel.send(
-            f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
+            f"{voters_role.mention} Please vote on allowing {player.mention} access to the league. "
             f"\nClick this link to vote <{env.LIVE_SITE}/ticket/{ticket_id}/vote>\n"
             f"Voting Ends: <t:{int(ticket.expires.timestamp())}:f>",
             user_mentions=True,
