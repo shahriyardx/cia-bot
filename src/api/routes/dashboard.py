@@ -36,6 +36,7 @@ async def add_to_server(bot: hikari.GatewayBot, request: web.Request):
 
 async def initialize_ticket(bot: hikari.GatewayBot, request: web.Request):
     await handle_ticket_init(bot, request)
+    return web.json_response({"success": True})
 
 
 async def start_ticket(bot: hikari.GatewayBot, request: web.Request):

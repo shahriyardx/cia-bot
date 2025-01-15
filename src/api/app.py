@@ -5,15 +5,17 @@ from hikari import GatewayBot
 from src.utils import env
 
 from .middlewares import trailing_slash_middleware
-from .routes import (
+from .routes.dashboard import (
     add_to_server,
     start_ticket,
     index,
     members,
     is_approver,
     finalize_ticket,
-    initialize_ticket
+    initialize_ticket,
 )
+from .routes.psn import profile as psn_profile, message as psn_message
+from .routes.xbox import profile as xbox_profile, message as xbox_message
 
 
 class Application(web.Application):
@@ -38,6 +40,11 @@ async def start_api(bot: GatewayBot):
     app.router.add_post("/ticket/{ticket_id}/init/", bot_route(initialize_ticket))
     app.router.add_post("/ticket/{ticket_id}/start/", bot_route(start_ticket))
     app.router.add_post("/ticket/{ticket_id}/finalize/", bot_route(finalize_ticket))
+
+    app.router.add_get("/psn/profile/{username}/", psn_profile)
+    app.router.add_get("/xbox/profile/{username}/", xbox_profile)
+    app.router.add_post("/psn/message/{username}/", psn_message)
+    app.router.add_post("/xbox/message/{username}/", xbox_message)
 
     cors = aiohttp_cors.setup(
         app,
