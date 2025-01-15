@@ -4,7 +4,7 @@ import hikari
 from aiohttp import web
 
 from src.utils import get_support_server
-from src.utils.ticket import start_ticket, approver_action
+from src.utils.ticket import handle_ticket_start, approver_action, handle_ticket_init
 
 
 async def index(bot, _):
@@ -34,8 +34,12 @@ async def add_to_server(bot: hikari.GatewayBot, request: web.Request):
     return web.json_response({"success": True})
 
 
-async def create_ticket(bot: hikari.GatewayBot, request: web.Request):
-    asyncio.get_event_loop().create_task(start_ticket(bot, request))
+async def initialize_ticket(bot: hikari.GatewayBot, request: web.Request):
+    await handle_ticket_init(bot, request)
+
+
+async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
+    asyncio.get_event_loop().create_task(handle_ticket_start(bot, request))
     return web.json_response({"success": True})
 
 

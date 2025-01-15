@@ -5,7 +5,7 @@ from typing import Awaitable
 import hikari
 from prisma.models import VotingTickets
 
-from .ticket import handle_ticket
+from .ticket import handle_ticket_end
 
 
 def get_delta(execution_time: datetime) -> float:
@@ -27,10 +27,10 @@ class Scheduler:
 
         if seconds > 0:
             await asyncio.sleep(seconds)
-            await handle_ticket(self.bot, ticket)
+            await handle_ticket_end(self.bot, ticket)
             return
 
-        await handle_ticket(self.bot, ticket)
+        await handle_ticket_end(self.bot, ticket)
 
     @staticmethod
     async def start_coro_task(time: datetime, coro: Awaitable) -> None:

@@ -30,26 +30,16 @@ async def get_ticket(server: hikari.GatewayGuild, user_id: int):
         lambda ticket: str(user_id) in ticket.name and "closed" not in ticket.name,
     )
 
-
-async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
+async def handle_ticket_init(bot: hikari.GatewayBot, request: web.Request):
     server = await get_support_server(bot)
-
     ticket_id = request.match_info.get("ticket_id")
-    if not ticket_id:
-        return
-
     ticket = await database.votingtickets.find_first(where={"id": ticket_id})
-    if not ticket:
-        return
 
     user = await database.user.find_first(where={"id": ticket.userId})
     user_info = await database.userinfo.find_first(where={"userId": user.id})
 
     player = server.get_member(int(user_info.discordId))
     inviter = server.get_member(int(user_info.inviterId))
-
-    cia_role = server.get_role(1283055661403476057)  # CIA role id
-    vote_channel: hikari.TextableGuildChannel = server.get_channel(1326635348100382852)
 
     await inviter.send(
         content=(
@@ -59,6 +49,22 @@ async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
             f"<{env.LIVE_SITE}/ticket/{ticket_id}/inviter>"
         )
     )
+
+async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
+    server = await get_support_server(bot)
+    ticket_id = request.match_info.get("ticket_id")
+    future = datetime.datetime.now() + datetime.timedelta(hours=24)
+
+    ticket = await database.votingtickets.find_first(where={"id": ticket_id})
+    ticket = await database.votingtickets.update(
+        where={"id": ticket_id}, data={"expres": future}
+    )
+
+    user = await database.user.find_first(where={"id": ticket.userId})
+    player = server.get_member(int(user.discordId))
+
+    cia_role = server.get_role(1283055661403476057)  # CIA role id
+    vote_channel: hikari.TextableGuildChannel = server.get_channel(1326635348100382852)
 
     await vote_channel.send(
         f"{cia_role.mention} Please vote on allowing {player.mention} access to the league. "
@@ -71,7 +77,7 @@ async def start_ticket(bot: hikari.GatewayBot, request: web.Request):
     await bot.scheduler.schedule_ticket(ticket)
 
 
-async def handle_ticket(bot: GatewayBot, ticket: VotingTickets):
+async def handle_ticket_end(bot: GatewayBot, ticket: VotingTickets):
     await database.votingtickets.update(where={"id": ticket.id}, data={"expired": True})
 
 

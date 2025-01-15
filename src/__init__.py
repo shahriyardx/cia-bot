@@ -58,7 +58,8 @@ class CiaBot(hikari.GatewayBot):
         tickets = await database.votingtickets.find_many(where={"expired": False})
 
         for ticket in tickets:
-            await self.scheduler.schedule_ticket(ticket)
+            if ticket.approved_by_inviter in ["yes", "no"]:
+                await self.scheduler.schedule_ticket(ticket)
 
     async def on_ready(self, _):
         await database.connect()
