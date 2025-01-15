@@ -9,6 +9,7 @@ RUN apt-get install -y gcc git build-essential libtool automake
 COPY requirements.txt ./
 
 RUN pip install -r requirements.txt
+RUN pip install psnawp
 
 COPY . .
 
