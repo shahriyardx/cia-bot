@@ -55,3 +55,30 @@ async def send_message(token: str, gamertag: str, message: str):
                 }
 
     return {"success": False, "error": "Something went wrong"}
+
+
+async def send_friend_request(token: str, gamertag: str):
+    data = await get_profile(token, gamertag)
+    if data["success"] is False:
+        return data
+
+    account_id = data["data"]["account_id"]
+    async with aiohttp.ClientSession() as session:
+        session.headers["Authorization"] = f"Bearer {token}"
+        async with session.put(f"{BASE_API}/{account_id}/add-as-friend") as resp:
+            if resp.status >= 200 and resp.status < 300:
+                return {"success": True, "data": "request sent"}
+
+            if resp.status == 429:
+                return {
+                    "success": False,
+                    "error": "Too many requests, Please wait 1 minute",
+                }
+
+            if resp.status == 404:
+                return {
+                    "success": False,
+                    "error": f"We are unable to find xbox account with gamertag '{gamertag}'",
+                }
+
+    return {"success": False, "error": "Something went wrong"}
