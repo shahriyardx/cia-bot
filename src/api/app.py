@@ -4,7 +4,6 @@ from hikari import GatewayBot
 
 from src.utils import env
 
-from .middlewares import trailing_slash_middleware
 from .routes.dashboard import (
     add_to_server,
     start_ticket,
@@ -15,7 +14,12 @@ from .routes.dashboard import (
     initialize_ticket,
 )
 from .routes.psn import profile as psn_profile, message as psn_message
-from .routes.xbox import profile as xbox_profile, message as xbox_message, friend_request
+from .routes.xbox import (
+    profile as xbox_profile,
+    message as xbox_message,
+    friend_request,
+)
+from .routes.short import shorten, redirect
 
 
 class Application(web.Application):
@@ -25,7 +29,7 @@ class Application(web.Application):
 
 
 async def start_api(bot: GatewayBot):
-    app = Application(bot, middlewares=[trailing_slash_middleware])
+    app = Application(bot)
 
     def bot_route(callback):
         async def wrapper(req: web.Request):
@@ -35,6 +39,11 @@ async def start_api(bot: GatewayBot):
 
     app.router.add_get("/", bot_route(index))
     app.router.add_get("/members/", bot_route(members))
+
+    app.router.add_post("/shorten/", shorten)
+    app.router.add_get("/{text}", redirect)
+    app.router.add_get("/{text}/", redirect)
+
     app.router.add_put("/add-to-server/", bot_route(add_to_server))
     app.router.add_get("/permissions/{user_id}/", bot_route(is_approver))
     app.router.add_post("/ticket/{ticket_id}/init/", bot_route(initialize_ticket))
