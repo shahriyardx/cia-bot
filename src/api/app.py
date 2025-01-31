@@ -37,7 +37,7 @@ async def start_api(bot: GatewayBot):
 
         return wrapper
 
-    app.router.add_get("/", bot_route(index))
+    app.router.add_get("/", index)
     app.router.add_get("/members/", bot_route(members))
 
     app.router.add_post("/shorten/", shorten)

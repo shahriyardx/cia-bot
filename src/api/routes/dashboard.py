@@ -7,9 +7,8 @@ from src.utils import get_support_server
 from src.utils.ticket import handle_ticket_start, approver_action, handle_ticket_init
 
 
-async def index(bot, _):
-    print(bot)
-    return web.json_response({"hello": "world"})
+async def index(req):
+    return web.HTTPFound("https://coverticealliance.com")
 
 
 async def add_to_server(bot: hikari.GatewayBot, request: web.Request):
