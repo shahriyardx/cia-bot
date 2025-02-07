@@ -1,4 +1,5 @@
 from aiohttp import web
+
 from src.api.utils.psn import get_profile, send_message
 from src.utils.database import database
 

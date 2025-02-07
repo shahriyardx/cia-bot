@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from miru import Client
 from hikari import GatewayBot
+from miru import Client
 
 from src.utils.scheduler import Scheduler
 

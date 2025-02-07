@@ -1,8 +1,9 @@
 from aiohttp import web
-from ..utils.short import generate_random_string
+from prisma.errors import UniqueViolationError
 
 from src.utils.database import database
-from prisma.errors import UniqueViolationError
+
+from ..utils.short import generate_random_string
 
 
 async def shorten(req: web.Request):

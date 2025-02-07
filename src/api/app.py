@@ -6,20 +6,19 @@ from src.utils import env
 
 from .routes.dashboard import (
     add_to_server,
-    start_ticket,
-    index,
-    members,
-    is_approver,
     finalize_ticket,
+    index,
     initialize_ticket,
+    is_approver,
+    members,
+    start_ticket,
 )
-from .routes.psn import profile as psn_profile, message as psn_message
-from .routes.xbox import (
-    profile as xbox_profile,
-    message as xbox_message,
-    friend_request,
-)
-from .routes.short import shorten, redirect
+from .routes.psn import message as psn_message
+from .routes.psn import profile as psn_profile
+from .routes.short import redirect, shorten
+from .routes.xbox import friend_request
+from .routes.xbox import message as xbox_message
+from .routes.xbox import profile as xbox_profile
 
 
 class Application(web.Application):

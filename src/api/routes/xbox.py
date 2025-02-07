@@ -1,6 +1,7 @@
 from aiohttp import web
-from src.api.utils.xbox import get_profile, send_message, send_friend_request
+
 from src.api.utils.console import get_xapi_token
+from src.api.utils.xbox import get_profile, send_friend_request, send_message
 from src.utils.database import database
 
 
@@ -21,6 +22,7 @@ async def message(request: web.Request):
 
     data = await send_message(authorization, username, message)
     return web.json_response(data)
+
 
 async def friend_request(request: web.Request):
     authorization = await get_xapi_token()

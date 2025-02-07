@@ -8,8 +8,8 @@ from src.utils.database import database, get_support_server
 
 from ..utils import Command, defer
 from ..utils.flags import DEFERRED_CREATE, LOADING, LOADING_EPHEMERAL, NONE
-from .view import DraftView
 from .utils import get_option_values
+from .view import DraftView
 
 
 @defer(LOADING, DEFERRED_CREATE)

@@ -1,5 +1,6 @@
-from psnawp_api import PSNAWP
 import traceback
+
+from psnawp_api import PSNAWP
 
 
 def get_profile(token: str, online_id: str):

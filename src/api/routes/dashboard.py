@@ -4,7 +4,7 @@ import hikari
 from aiohttp import web
 
 from src.utils import get_support_server
-from src.utils.ticket import handle_ticket_start, approver_action, handle_ticket_init
+from src.utils.ticket import approver_action, handle_ticket_init, handle_ticket_start
 
 
 async def index(req):
