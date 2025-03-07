@@ -126,6 +126,7 @@ model UserInfo {
   season      Season        @relation(fields: [seasonId], references: [id])
   seasonId    String
   MatchPlayer MatchPlayer[]
+  approved    Boolean       @default(false)
 
   createdAt            DateTime               @default(now())
   SeasonalRegistration SeasonalRegistration[]
@@ -263,16 +264,17 @@ model RawMatch {
   season          Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   seasonId        String
   isCalculated    Boolean @default(false)
+  archived        Boolean @default(false)
 }
 
 model MatchClub {
   id String @id @default(cuid())
 
   clubId String
-  club   Club   @relation("HomeClub", fields: [clubId], references: [clubId])
+  club   Club   @relation("HomeClub", fields: [clubId], references: [id])
 
   clubAgainstId String
-  clubAgainst   Club   @relation("AwayClub", fields: [clubAgainstId], references: [clubId], onDelete: Cascade)
+  clubAgainst   Club   @relation("AwayClub", fields: [clubAgainstId], references: [id], onDelete: Cascade)
 
   match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
   matchId String
@@ -423,5 +425,5 @@ model Vote {
   downvote_reason String?
 
   userId          String
-  votingTicketsId String @unique
+  votingTicketsId String
 }
