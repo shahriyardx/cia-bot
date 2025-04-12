@@ -13,7 +13,7 @@ from .view import DraftView
 
 
 @defer(LOADING, DEFERRED_CREATE)
-async def draft(bot: CiaBot, interaction: hikari.CommandInteraction):
+async def draft(_bot: CiaBot, interaction: hikari.CommandInteraction):
     settings = await database.settings.find_first()
     options = get_option_values(interaction)
 
@@ -69,6 +69,8 @@ async def draft(bot: CiaBot, interaction: hikari.CommandInteraction):
         content=f"{member.mention} has been drafted for team {team.mention}",
         components=[],
     )
+
+    await member.add_role(team)
 
 
 @defer(LOADING, DEFERRED_CREATE)

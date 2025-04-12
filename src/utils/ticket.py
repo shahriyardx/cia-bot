@@ -82,7 +82,7 @@ async def handle_ticket_start(bot: hikari.GatewayBot, request: web.Request):
 
         return
     else:
-        future = datetime.datetime.now() + datetime.timedelta(hours=24)
+        future = datetime.datetime.now() + datetime.timedelta(hours=72)
         ticket = await database.votingtickets.update(
             where={"id": ticket_id}, data={"expires": future}
         )
