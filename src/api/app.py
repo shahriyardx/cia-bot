@@ -12,6 +12,7 @@ from .routes.dashboard import (
     is_approver,
     members,
     start_ticket,
+    register_season
 )
 from .routes.psn import message as psn_message
 from .routes.psn import profile as psn_profile
@@ -48,6 +49,7 @@ async def start_api(bot: GatewayBot):
     app.router.add_post("/ticket/{ticket_id}/init/", bot_route(initialize_ticket))
     app.router.add_post("/ticket/{ticket_id}/start/", bot_route(start_ticket))
     app.router.add_post("/ticket/{ticket_id}/finalize/", bot_route(finalize_ticket))
+    app.router.add_post("/register-season/{user_id}/{role}/", bot_route(register_season))
 
     app.router.add_get("/playstation/profile/{username}/", psn_profile)
     app.router.add_post("/playstation/message/{username}/", psn_message)

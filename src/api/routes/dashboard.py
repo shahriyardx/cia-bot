@@ -96,3 +96,32 @@ async def finalize_ticket(bot: hikari.GatewayBot, req: web.Request):
     await approver_action(bot, ticket_id)
 
     return web.json_response({"success": True})
+
+
+async def register_season(bot: hikari.GatewayBot, req: web.Request):
+    user_id = req.match_info.get("user_id")
+    reg_role = req.match_info.get("role")
+
+    support_server = await get_support_server(bot)
+    member = support_server.get_member(user_id)
+
+    if not member:
+        return web.json_response({"success": False})
+
+    add = (
+        support_server.get_role(1283055661445546036)
+        if reg_role == "normal"
+        else support_server.get_role(1283055661344886921)
+    )
+
+    remove = (
+        support_server.get_role(1283055661344886921)
+        if reg_role == "normal"
+        else support_server.get_role(1283055661445546036)
+    )
+
+    await member.add_role(add)
+    await member.remove_role(remove)
+
+
+    return web.json_response({"success": True})
