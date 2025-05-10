@@ -19,6 +19,7 @@ async def draft(_bot: CiaBot, interaction: hikari.CommandInteraction):
 
     member: hikari.InteractionMember = options["member"]
     team: hikari.Role = options["team"]
+    rd: int = options["round"]
 
     club = await database.club.find_first(where={"name": team.name})
 
@@ -62,6 +63,7 @@ async def draft(_bot: CiaBot, interaction: hikari.CommandInteraction):
             "userInfoId": signed_up.id,
             "userId": signed_up.user.id,
             "role": "player",
+            "round": int(rd),
         }
     )
 
