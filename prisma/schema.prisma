@@ -88,6 +88,7 @@ model SeasonalDraft {
   club     Club       @relation(fields: [clubId], references: [id], onDelete: Cascade)
   role     PlayerRole @default(player)
   round    Int        @default(1)
+   ovr      Int        @default(0)
 
   seasonId   String
   userInfoId String
