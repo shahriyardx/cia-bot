@@ -108,6 +108,10 @@ async def assign(bot: CiaBot, interaction: hikari.CommandInteraction):
             content=f"{member.mention} is already drafted for team `{drafted.club.name}`"
         )
 
+    old = await database.seasonaldraft.find_many(where={
+        "seasonId": settings.seasonId,
+    })
+
     await database.seasonaldraft.create(
         {
             "clubId": club.id,
@@ -116,6 +120,7 @@ async def assign(bot: CiaBot, interaction: hikari.CommandInteraction):
             "userId": signed_up.user.id,
             "role": position,
             "round": 0,
+            "ovr": len(old) + 1,
         }
     )
 
