@@ -47,8 +47,8 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
         Position.goalie: roles.goalie,
     }
 
-    pp = position_roles.get(reg.primaryPosition, user_info.primaryPosition)
-    sp = position_roles.get(reg.secondaryPosition, user_info.secondaryPosition)
+    pp = position_roles.get(reg.primaryPosition if reg else user_info.primaryPosition)
+    sp = position_roles.get(reg.secondaryPosition if reg else user_info.secondaryPosition)
 
     for val in position_roles.values():
         await member.remove_role(int(val))
