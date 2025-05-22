@@ -20,7 +20,7 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
     settings = await database.settings.find_first()
     roles = await database.roles.find_first()
 
-    draft = await database.seasonalregistration.find_first(
+    reg = await database.seasonalregistration.find_first(
         where={"userInfoId": user_info.id, "seasonId": settings.seasonId}
     )
 
@@ -47,8 +47,8 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
         Position.goalie: roles.goalie,
     }
 
-    pp = position_roles.get(draft.primaryPosition, draft.primaryPosition)
-    sp = position_roles.get(draft.secondaryPosition, draft.secondaryPosition)
+    pp = position_roles.get(reg.primaryPosition, user_info.primaryPosition)
+    sp = position_roles.get(reg.secondaryPosition, user_info.secondaryPosition)
 
     for val in position_roles.values():
         await member.remove_role(int(val))
