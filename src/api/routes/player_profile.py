@@ -36,7 +36,10 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
         else user_info.gamertag
     )
 
-    await member.edit(nickname=nick)
+    try:
+        await member.edit(nickname=nick)
+    except Exception as e: # noqa
+        pass
 
     position_roles = {
         Position.left_wing: roles.left_wing,
@@ -51,10 +54,22 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
     sp = position_roles.get(reg.secondaryPosition if reg else user_info.secondaryPosition)
 
     for val in position_roles.values():
-        await member.remove_role(int(val))
+        try:
+            await member.remove_role(int(val))
+        except Exception as e: # noqa
+            pass
 
-    await member.add_role(int(pp))
-    await member.add_role(int(sp))
+    if reg:
+        try:
+            await member.add_role(int(1283055661445546036))
+        except Exception as e: # noqa
+            pass
+
+    try:
+        await member.add_role(int(sp))
+        await member.add_role(int(pp))
+    except Exception as e:  # noqa
+        pass
 
     return web.json_response(
         {
