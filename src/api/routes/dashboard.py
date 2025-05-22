@@ -123,5 +123,4 @@ async def register_season(bot: hikari.GatewayBot, req: web.Request):
     await member.add_role(add)
     await member.remove_role(remove)
 
-
     return web.json_response({"success": True})

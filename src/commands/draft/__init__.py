@@ -56,9 +56,11 @@ async def draft(_bot: CiaBot, interaction: hikari.CommandInteraction):
             content=f"{member.mention} is already drafted for team `{drafted.club.name}`"
         )
 
-    old = await database.seasonaldraft.find_many(where={
-        "seasonId": settings.seasonId,
-    })
+    old = await database.seasonaldraft.find_many(
+        where={
+            "seasonId": settings.seasonId,
+        }
+    )
 
     await database.seasonaldraft.create(
         {
@@ -108,9 +110,11 @@ async def assign(bot: CiaBot, interaction: hikari.CommandInteraction):
             content=f"{member.mention} is already drafted for team `{drafted.club.name}`"
         )
 
-    old = await database.seasonaldraft.find_many(where={
-        "seasonId": settings.seasonId,
-    })
+    old = await database.seasonaldraft.find_many(
+        where={
+            "seasonId": settings.seasonId,
+        }
+    )
 
     await database.seasonaldraft.create(
         {

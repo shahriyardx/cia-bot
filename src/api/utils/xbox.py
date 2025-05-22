@@ -9,6 +9,7 @@ async def get_profile(token: str, gamertag: str):
         async with session.get(f"{BASE_API}/{gamertag}/profile-for-gamertag") as resp:
             if resp.status == 200:
                 data = await resp.json()
+                print(data)
                 data = {"account_id": data["id"], "username": gamertag}
 
                 return {"success": True, "data": data}
@@ -21,6 +22,29 @@ async def get_profile(token: str, gamertag: str):
                 return {
                     "success": False,
                     "error": f"We are unable to find your xbox account with gamertag '{gamertag}'",
+                }
+
+    return {"success": False, "error": "Something went wrong"}
+
+
+async def get_profile_by_id(token: str, account_id: str):
+    async with aiohttp.ClientSession() as session:
+        session.headers["Authorization"] = f"Bearer {token}"
+        async with session.get(f"{BASE_API}/{account_id}/profile") as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                data = {"account_id": data["xuid"], "username": data["gamertag"]}
+
+                return {"success": True, "data": data}
+            if resp.status == 429:
+                return {
+                    "success": False,
+                    "error": "Too many requests, Please wait 1 minute",
+                }
+            if resp.status == 404:
+                return {
+                    "success": False,
+                    "error": f"We are unable to find your xbox account with id '{account_id}'",
                 }
 
     return {"success": False, "error": "Something went wrong"}

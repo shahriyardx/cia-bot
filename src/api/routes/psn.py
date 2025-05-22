@@ -1,26 +1,30 @@
 from aiohttp import web
 
-from src.api.utils.psn import get_profile, send_message
-from src.utils.database import database
+from src.api.utils.console import get_npsso
+from src.api.utils.psn import get_profile, get_profile_by_id, send_message
 
 
 async def profile(request: web.Request):
-    settings = await database.settings.find_first()
-    authorization = settings.npsso
-
+    authorization = await get_npsso()
     username = request.match_info["username"]
 
     data = get_profile(authorization, username)
     return web.json_response(data)
 
 
-async def message(request: web.Request):
-    settings = await database.settings.find_first()
-    authorization = settings.npsso
+async def profile_by_id(request: web.Request):
+    authorization = await get_npsso()
+    account_id = request.match_info["account_id"]
 
+    data = get_profile_by_id(authorization, account_id)
+    return web.json_response(data)
+
+
+async def message(request: web.Request):
+    authorization = get_npsso()
     body = await request.json()
     username = request.match_info["username"]
-    message = body.get("message")
+    message_content = body.get("message")
 
-    data = send_message(authorization, username, message)
+    data = send_message(authorization, username, message_content)
     return web.json_response(data)

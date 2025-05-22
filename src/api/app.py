@@ -11,15 +11,17 @@ from .routes.dashboard import (
     initialize_ticket,
     is_approver,
     members,
+    register_season,
     start_ticket,
-    register_season
 )
 from .routes.psn import message as psn_message
 from .routes.psn import profile as psn_profile
+from .routes.psn import profile_by_id as psn_profile_by_id
 from .routes.short import redirect, shorten
 from .routes.xbox import friend_request
 from .routes.xbox import message as xbox_message
 from .routes.xbox import profile as xbox_profile
+from .routes.xbox import profile_by_id as xbox_profile_by_id
 
 
 class Application(web.Application):
@@ -49,12 +51,16 @@ async def start_api(bot: GatewayBot):
     app.router.add_post("/ticket/{ticket_id}/init/", bot_route(initialize_ticket))
     app.router.add_post("/ticket/{ticket_id}/start/", bot_route(start_ticket))
     app.router.add_post("/ticket/{ticket_id}/finalize/", bot_route(finalize_ticket))
-    app.router.add_post("/register-season/{user_id}/{role}/", bot_route(register_season))
+    app.router.add_post(
+        "/register-season/{user_id}/{role}/", bot_route(register_season)
+    )
 
     app.router.add_get("/playstation/profile/{username}/", psn_profile)
+    app.router.add_get("/playstation/profilebyid/{account_id}/", psn_profile_by_id)
     app.router.add_post("/playstation/message/{username}/", psn_message)
 
     app.router.add_get("/xbox/profile/{username}/", xbox_profile)
+    app.router.add_get("/xbox/profilebyid/{account_id}/", xbox_profile_by_id)
     app.router.add_post("/xbox/message/{username}/", xbox_message)
     app.router.add_post("/xbox/request/{username}/", friend_request)
 
