@@ -22,6 +22,7 @@ from .routes.xbox import friend_request
 from .routes.xbox import message as xbox_message
 from .routes.xbox import profile as xbox_profile
 from .routes.xbox import profile_by_id as xbox_profile_by_id
+from .routes.player_profile import sync_profile
 
 
 class Application(web.Application):
@@ -63,6 +64,8 @@ async def start_api(bot: GatewayBot):
     app.router.add_get("/xbox/profilebyid/{account_id}/", xbox_profile_by_id)
     app.router.add_post("/xbox/message/{username}/", xbox_message)
     app.router.add_post("/xbox/request/{username}/", friend_request)
+
+    app.router.add_post("/sync-profile/{user_id}/", bot_route(sync_profile))
 
     cors = aiohttp_cors.setup(
         app,
