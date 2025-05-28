@@ -36,10 +36,24 @@ async def sync_profile(bot: hikari.GatewayBot, request: web.Request):
         else user_info.gamertag
     )
 
+    old_nick = member.display_name
+
     try:
         await member.edit(nickname=nick)
     except Exception as e: # noqa
         pass
+
+    name_change_channel = support_server.get_channel(1374830602490216458)
+    if old_nick != nick and name_change_channel and isinstance(name_change_channel, (hikari.GuildNewsChannel, hikari.TextableGuildChannel)):
+        try:
+            msg = await name_change_channel.send(
+                content=f"`{old_nick}` has changed their gamertag/psn name to `{nick}`"
+            )
+
+            await bot.rest.crosspost_message(name_change_channel, msg)
+        except Exception as e2:
+            print("player_profile.py e2", e2)
+            pass
 
     position_roles = {
         Position.left_wing: roles.left_wing,
