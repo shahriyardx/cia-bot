@@ -21,7 +21,7 @@ async def profile_by_id(request: web.Request):
 
 
 async def message(request: web.Request):
-    authorization = get_npsso()
+    authorization = await get_npsso()
     body = await request.json()
     username = request.match_info["username"]
     message_content = body.get("message")

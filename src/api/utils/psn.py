@@ -46,7 +46,6 @@ def get_profile_by_id(token: str, online_id: str):
 
 
 def send_message(token: str, online_id: str, message: str):
-    print("TOKEN", token)
     api = PSNAWP(token)
 
     try:
