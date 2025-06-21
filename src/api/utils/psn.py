@@ -50,7 +50,8 @@ def send_message(token: str, online_id: str, message: str):
 
     try:
         profile = api.user(online_id=online_id)
-    except:
+    except Exception as e:
+        traceback.print_exc()
         return {
             "success": False,
             "error": f"We are unable to find your playstation account with PSN '{online_id}'",
